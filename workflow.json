@@ -1,0 +1,191 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "nsight-News",
+        "formDescription": "Digite um tema para buscar e resumir notícias",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Tema da notícia",
+              "fieldName": "tema"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "f90e8eae-37ff-4af2-9b48-098eea018e0c",
+      "name": "caca de busca ",
+      "webhookId": "723348ab-f774-4e55-9269-205f6395ae70"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.rss2json.com/v1/api.json?rss_url={{ encodeURIComponent(\"https://news.google.com/rss/search?q=\" + $json[\"tema\"]) }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "rss_url",
+              "value": "=https://news.google.com/rss/search?q={{$json[\"tema\"]}}&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+            },
+            {
+              "name": "api_key",
+              "value": "nrf6agy1a53wl3d2ukyen7fil8fkhocpjq4rq4yu"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -144,
+        -128
+      ],
+      "id": "597185f1-733b-4bae-acae-f79504b23a5c",
+      "name": "buscar noticias "
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "523872fd-ad93-4cfa-b271-c3b429df065b",
+              "leftValue": "={{ $json.items?.length ?? 0 }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        -128
+      ],
+      "id": "d064939f-5a89-4866-ab65-74c124872ad4",
+      "name": "Verificando se encontrou noticias "
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c9d6d06-2f86-4c20-b1a3-0722f90a8ac7",
+              "name": "mensagem",
+              "value": "Encontrei notícias sobre esse tema! 📰",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        -224
+      ],
+      "id": "048a1194-befc-4d36-880e-297ded5997b1",
+      "name": "responder com noticias"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5269451-398c-4cc1-a510-835a18834f7d",
+              "name": "mensagem",
+              "value": "Não encontrei notícias sobre esse tema 😢",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        -32
+      ],
+      "id": "59118b79-69a9-475d-af39-d4f04c0d8042",
+      "name": "responder sem noticias "
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "caca de busca ": {
+      "main": [
+        [
+          {
+            "node": "buscar noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar noticias ": {
+      "main": [
+        [
+          {
+            "node": "Verificando se encontrou noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificando se encontrou noticias ": {
+      "main": [
+        [
+          {
+            "node": "responder com noticias",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "responder sem noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a55d0d68-f970-44b6-b50c-cc99ec03ad14",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "24f3d6a958f1f724f1eefa504dd7ef1c53335eae3f2aabd086abf0638c720e6a"
+  },
+  "id": "5OQSNFsTXT36YwjG",
+  "tags": []
+}
