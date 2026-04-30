@@ -11,24 +11,26 @@
 
 
 ## Arquitetura
+```mermaid
 graph TD
-    Start((Início: Agendador)) --> Crawler[Crawler: Monitora RSS/Sitemaps]
-    Crawler --> Check{Notícia Nova?}
+Start((Início: Agendador)) --> Crawler[Crawler: Monitora RSS/Sitemaps]
+Crawler --> Check{Notícia Nova?}
+
+Check -- Não --> End((Fim do Ciclo))
+Check -- Sim --> Fetch[Extração do Conteúdo Completo]
     
-    Check -- Não --> End((Fim do Ciclo))
-    Check -- Sim --> Fetch[Extração do Conteúdo Completo]
+Fetch --> AI[IA: Gerar Título Curto + 3 Bullet Points]
+AI --> Categorize[Classificação Automática: Esportes, Tech, etc.]
     
-    Fetch --> AI[IA: Gerar Título Curto + 3 Bullet Points]
-    AI --> Categorize[Classificação Automática: Esportes, Tech, etc.]
+Categorize --> DB[(Banco de Dados)]
+DB --> Frontend[Atualização do Feed em Tempo Real]
     
-    Categorize --> DB[(Banco de Dados)]
-    DB --> Frontend[Atualização do Feed em Tempo Real]
+Frontend --> End
     
-    Frontend --> End
-    
-    subgraph "Pipeline de Automação"
-    Crawler
-    Fetch
-    AI
-    Categorize
-    end
+subgraph "Pipeline de Automação"
+Crawler
+Fetch
+AI
+Categorize
+end
+```
