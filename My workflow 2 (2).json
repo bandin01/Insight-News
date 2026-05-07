@@ -1,0 +1,251 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.tema }}"
+            },
+            {
+              "name": "hl",
+              "value": "pt-BR"
+            },
+            {
+              "name": "gl",
+              "value": "BR"
+            },
+            {
+              "name": "ceid",
+              "value": "BR:pt-419"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -144,
+        -128
+      ],
+      "id": "597185f1-733b-4bae-acae-f79504b23a5c",
+      "name": "buscar noticias "
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e9bff1ac-15fa-4cdd-8939-ec5789cd289c",
+              "leftValue": "={{ $json.data.includes(\"<item>\") ? 1 : 0 }}\n",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        80,
+        -128
+      ],
+      "id": "d064939f-5a89-4866-ab65-74c124872ad4",
+      "name": "Verificando se encontrou noticias "
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5269451-398c-4cc1-a510-835a18834f7d",
+              "name": "mensagem",
+              "value": "Não encontrei notícias sobre esse tema 😢",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        -48
+      ],
+      "id": "59118b79-69a9-475d-af39-d4f04c0d8042",
+      "name": "responder sem noticias "
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Você é um assistente de resumo de notícias. Seu papel é analisar notícias reais encontradas no fluxo e responder de forma prática, organizada e objetiva.",
+              "role": "model"
+            },
+            {
+              "content": "=Dados encontrados:\n{{ $json.data.substring(0,800) }}\n\nCrie:\n1. Resumo geral\n2. Principais notícias\n3. Pontos importantes\n4. Conclusão final"
+            }
+          ]
+        },
+        "builtInTools": {
+          "googleSearch": true
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        -336
+      ],
+      "id": "c1d10dcb-11d1-4315-875e-80b6d985e096",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "awrPXUQXoLJLV1M6",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Resumo Inteligente de Notícias",
+        "formDescription": "Digite um tema para buscar notícias reais e gerar um resumo usando IA Gemini.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Tema da notícia",
+              "fieldName": "tema"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "7ea10476-07af-49d5-bfbf-ff2c3c8fe7e9",
+      "name": "On form submission",
+      "webhookId": "019d7927-3087-4d56-aa27-ad48a4a41335"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84351a41-2374-4bc4-a8fd-56d0211ab843",
+              "name": "mensagem",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        -336
+      ],
+      "id": "97949494-0bc0-4318-b56d-b55926bda96c",
+      "name": "responder com noticia "
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "buscar noticias ": {
+      "main": [
+        [
+          {
+            "node": "Verificando se encontrou noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificando se encontrou noticias ": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "responder sem noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "responder com noticia ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "buscar noticias ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ec129203-4d14-450a-9572-b8c36c90443a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "24f3d6a958f1f724f1eefa504dd7ef1c53335eae3f2aabd086abf0638c720e6a"
+  },
+  "id": "5OQSNFsTXT36YwjG",
+  "tags": []
+}
